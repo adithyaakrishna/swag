@@ -8,8 +8,6 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Set basename for GitHub Pages deployment
-// This should match the base path in vite.config.ts
 const basename = import.meta.env.MODE === 'production' ? '/swag' : '';
 
 const App = () => (
