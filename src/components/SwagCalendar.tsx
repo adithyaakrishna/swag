@@ -58,7 +58,7 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
         isToday: dateString === today.toDateString(),
         isPast: date < today,
         isCurrentMonth: false,
-        companyName: bookingDetails.get(dateString),
+        companyName: undefined, // Don't show company names for previous month
       });
     }
     
@@ -86,7 +86,7 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
         isToday: dateString === today.toDateString(),
         isPast: date < today,
         isCurrentMonth: false,
-        companyName: bookingDetails.get(dateString),
+        companyName: undefined, // Don't show company names for next month
       });
       nextMonthDay++;
     }
@@ -184,7 +184,7 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
               onClick={() => handleDateClick(day)}
               className={getDateButtonClass(day)}
               disabled={loading || day.isPast || day.isBooked || !day.isCurrentMonth}
-              aria-label={`${day.date.toDateString()}${day.isBooked && day.companyName ? ` - Booked by ${day.companyName}` : ''}${day.isPast ? ' - Past date' : ''}`}
+              aria-label={`${day.date.toDateString()}${day.isBooked && day.companyName && day.isCurrentMonth ? ` - Booked by ${day.companyName}` : day.isBooked ? ' - Already booked' : ''}${day.isPast ? ' - Past date' : ''}`}
             >
               <div className="flex flex-col items-center justify-center h-full">
                 <span className="text-sm">{day.date.getDate()}</span>

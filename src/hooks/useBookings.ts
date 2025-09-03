@@ -47,10 +47,16 @@ export const useBookings = () => {
     email: string,
     description: string
   ) => {
+    // Format date as YYYY-MM-DD in local timezone, not UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const localDateString = `${year}-${month}-${day}`;
+    
     const { error } = await supabase
       .from('bookings')
       .insert({
-        booking_date: date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        booking_date: localDateString,
         company_name: companyName,
         email: email,
         description: description || null,
