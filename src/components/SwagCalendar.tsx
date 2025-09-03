@@ -40,8 +40,7 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
     const startingDayOfWeek = firstDay.getDay();
     
     const days: CalendarDay[] = [];
-    
-    // Previous month's days
+
     const prevMonth = new Date(year, month - 1, 0);
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       const date = new Date(year, month - 1, prevMonth.getDate() - i);
@@ -54,7 +53,6 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
       });
     }
     
-    // Current month's days
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       days.push({
@@ -66,7 +64,6 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
       });
     }
     
-    // Next month's days
     const totalCells = Math.ceil(days.length / 7) * 7;
     let nextMonthDay = 1;
     while (days.length < totalCells) {
@@ -97,7 +94,7 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
   };
 
   const handleDateClick = (day: CalendarDay) => {
-    if (day.isPast || day.isBooked || !day.isCurrentMonth) return;
+    if (loading || day.isPast || day.isBooked || !day.isCurrentMonth) return;
     onDateSelect(day.date);
   };
 
@@ -124,8 +121,13 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
   const days = getDaysInMonth(currentMonth);
 
   return (
-    <div className="bg-card border border-border p-4 w-full">
-      {/* Header */}
+    <div className="bg-card border border-border p-4 w-full relative">
+      {loading && (
+        <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
+          <div className="text-muted-foreground">Loading calendar...</div>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between mb-4">
         <Button
           variant="ghost"
@@ -150,7 +152,6 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
         </Button>
       </div>
 
-      {/* Days of week */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {daysOfWeek.map(day => (
           <div
@@ -162,21 +163,20 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
         ))}
       </div>
 
-      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
         {days.map((day, index) => (
           <button
             key={index}
             onClick={() => handleDateClick(day)}
             className={getDateButtonClass(day)}
-            disabled={day.isPast || day.isBooked || !day.isCurrentMonth}
+            disabled={loading || day.isPast || day.isBooked || !day.isCurrentMonth}
+            aria-label={`${day.date.toDateString()}${day.isBooked ? ' - Already booked' : ''}${day.isPast ? ' - Past date' : ''}`}
           >
             {day.date.getDate()}
           </button>
         ))}
       </div>
 
-      {/* Legend */}
       <div className="mt-4 flex justify-center space-x-4 text-xs text-muted-foreground">
         <div className="flex items-center space-x-1">
           <div className="w-2 h-2 bg-calendar-available border border-border" />

@@ -2,14 +2,13 @@ import { useState, useRef } from "react";
 import Hero from "@/components/Hero";
 import SwagCalendar from "@/components/SwagCalendar";
 import BookingForm, { BookingFormData } from "@/components/BookingForm";
-import { supabase } from "@/integrations/supabase/client";
 import { useBookings } from "@/hooks/useBookings";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const bookingRef = useRef<HTMLDivElement>(null);
-  const { createBooking } = useBookings();
+  const { createBooking, refetch } = useBookings();
   const { toast } = useToast();
 
   const scrollToBooking = () => {
@@ -25,23 +24,32 @@ const Index = () => {
         formData.description
       );
       
-      setSelectedDate(null); // Clear selection after successful booking
+      setSelectedDate(null);
       
       toast({
         title: "Booking Confirmed!",
         description: "Your swag day has been successfully booked.",
       });
     } catch (error: any) {
-      const message = error.message?.includes('unique_booking_date') 
-        ? 'This date is already booked. Please select another date.'
+      const isDuplicateBooking = error.message?.includes('unique_booking_date') || 
+                                 error.code === '23505';
+      
+      const message = isDuplicateBooking 
+        ? 'This date has already been booked by another user. The calendar has been refreshed. Please select a different available date.'
         : 'There was an error creating your booking. Please try again.';
         
       toast({
-        title: "Booking Failed",
+        title: isDuplicateBooking ? "Date Already Booked" : "Booking Failed",
         description: message,
         variant: "destructive",
       });
-      throw error; // Re-throw to let BookingForm handle the error state
+      
+      if (isDuplicateBooking) {
+        await refetch();
+        setSelectedDate(null);
+      }
+      
+      throw error;
     }
   };
 

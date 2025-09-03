@@ -14,7 +14,12 @@ export const useBookings = () => {
       if (error) throw error;
 
       const dates = new Set(
-        data?.map(booking => new Date(booking.booking_date).toDateString()) || []
+        data?.map(booking => {
+          // Parse the date string as local date to avoid timezone issues
+          const [year, month, day] = booking.booking_date.split('-').map(Number);
+          const localDate = new Date(year, month - 1, day);
+          return localDate.toDateString();
+        }) || []
       );
       setBookedDates(dates);
     } catch (error) {
