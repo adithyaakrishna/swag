@@ -2,6 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CalendarDay {
   date: Date;
@@ -9,6 +15,7 @@ interface CalendarDay {
   isToday: boolean;
   isPast: boolean;
   isCurrentMonth: boolean;
+  companyName?: string;
 }
 
 interface SwagCalendarProps {
@@ -18,7 +25,7 @@ interface SwagCalendarProps {
 
 const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const { bookedDates, loading } = useBookings();
+  const { bookedDates, bookingDetails, loading } = useBookings();
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -44,23 +51,27 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
     const prevMonth = new Date(year, month - 1, 0);
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       const date = new Date(year, month - 1, prevMonth.getDate() - i);
+      const dateString = date.toDateString();
       days.push({
         date,
-        isBooked: bookedDates.has(date.toDateString()),
-        isToday: date.toDateString() === today.toDateString(),
+        isBooked: bookedDates.has(dateString),
+        isToday: dateString === today.toDateString(),
         isPast: date < today,
         isCurrentMonth: false,
+        companyName: bookingDetails.get(dateString),
       });
     }
     
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
+      const dateString = date.toDateString();
       days.push({
         date,
-        isBooked: bookedDates.has(date.toDateString()),
-        isToday: date.toDateString() === today.toDateString(),
+        isBooked: bookedDates.has(dateString),
+        isToday: dateString === today.toDateString(),
         isPast: date < today,
         isCurrentMonth: true,
+        companyName: bookingDetails.get(dateString),
       });
     }
     
@@ -68,12 +79,14 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
     let nextMonthDay = 1;
     while (days.length < totalCells) {
       const date = new Date(year, month + 1, nextMonthDay);
+      const dateString = date.toDateString();
       days.push({
         date,
-        isBooked: bookedDates.has(date.toDateString()),
-        isToday: date.toDateString() === today.toDateString(),
+        isBooked: bookedDates.has(dateString),
+        isToday: dateString === today.toDateString(),
         isPast: date < today,
         isCurrentMonth: false,
+        companyName: bookingDetails.get(dateString),
       });
       nextMonthDay++;
     }
@@ -99,7 +112,7 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
   };
 
   const getDateButtonClass = (day: CalendarDay) => {
-    let classes = "w-full h-10 text-sm border border-border transition-colors ";
+    let classes = "w-full h-14 text-sm border border-border transition-colors ";
     
     if (!day.isCurrentMonth) {
       classes += "text-muted-foreground bg-transparent cursor-not-allowed ";
@@ -164,17 +177,43 @@ const SwagCalendar = ({ selectedDate, onDateSelect }: SwagCalendarProps) => {
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {days.map((day, index) => (
-          <button
-            key={index}
-            onClick={() => handleDateClick(day)}
-            className={getDateButtonClass(day)}
-            disabled={loading || day.isPast || day.isBooked || !day.isCurrentMonth}
-            aria-label={`${day.date.toDateString()}${day.isBooked ? ' - Already booked' : ''}${day.isPast ? ' - Past date' : ''}`}
-          >
-            {day.date.getDate()}
-          </button>
-        ))}
+        {days.map((day, index) => {
+          const buttonContent = (
+            <button
+              key={index}
+              onClick={() => handleDateClick(day)}
+              className={getDateButtonClass(day)}
+              disabled={loading || day.isPast || day.isBooked || !day.isCurrentMonth}
+              aria-label={`${day.date.toDateString()}${day.isBooked && day.companyName ? ` - Booked by ${day.companyName}` : ''}${day.isPast ? ' - Past date' : ''}`}
+            >
+              <div className="flex flex-col items-center justify-center h-full">
+                <span className="text-sm">{day.date.getDate()}</span>
+                {day.isBooked && day.companyName && day.isCurrentMonth && (
+                  <span className="text-[9px] truncate w-full px-1 text-muted-foreground">
+                    {day.companyName}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+
+          if (day.isBooked && day.companyName && day.isCurrentMonth) {
+            return (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {buttonContent}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Booked by: {day.companyName}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          }
+
+          return buttonContent;
+        })}
       </div>
 
       <div className="mt-4 flex justify-center space-x-4 text-xs text-muted-foreground">

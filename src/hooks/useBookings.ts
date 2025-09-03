@@ -1,27 +1,39 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface BookingInfo {
+  date: string;
+  companyName: string;
+}
+
 export const useBookings = () => {
   const [bookedDates, setBookedDates] = useState<Set<string>>(new Set());
+  const [bookingDetails, setBookingDetails] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const fetchBookings = async () => {
     try {
       const { data, error } = await supabase
         .from('bookings')
-        .select('booking_date');
+        .select('booking_date, company_name');
 
       if (error) throw error;
 
-      const dates = new Set(
-        data?.map(booking => {
-          // Parse the date string as local date to avoid timezone issues
-          const [year, month, day] = booking.booking_date.split('-').map(Number);
-          const localDate = new Date(year, month - 1, day);
-          return localDate.toDateString();
-        }) || []
-      );
+      const dates = new Set<string>();
+      const details = new Map<string, string>();
+      
+      data?.forEach(booking => {
+        // Parse the date string as local date to avoid timezone issues
+        const [year, month, day] = booking.booking_date.split('-').map(Number);
+        const localDate = new Date(year, month - 1, day);
+        const dateString = localDate.toDateString();
+        
+        dates.add(dateString);
+        details.set(dateString, booking.company_name);
+      });
+      
       setBookedDates(dates);
+      setBookingDetails(details);
     } catch (error) {
       console.error('Error fetching bookings:', error);
     } finally {
@@ -76,5 +88,5 @@ export const useBookings = () => {
     };
   }, []);
 
-  return { bookedDates, loading, refetch: fetchBookings, createBooking };
+  return { bookedDates, bookingDetails, loading, refetch: fetchBookings, createBooking };
 };
