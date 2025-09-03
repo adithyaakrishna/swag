@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Minimal color scheme */
+    --background: 210 7% 12%;  /* #1d1f20 */
+    --foreground: 0 0% 100%;   /* white */
+
+    --card: 210 7% 12%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 210 7% 12%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 158 64% 52%;     /* #29BC89 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 7% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 7% 20%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 158 64% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 7% 25%;
+    --input: 210 7% 15%;
+    --ring: 158 64% 52%;
+
+    /* Calendar colors */
+    --calendar-selected: 158 64% 52%;
+    --calendar-available: 210 7% 20%;
+    --calendar-booked: 210 7% 15%;
+    --calendar-hover: 210 7% 25%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Same colors for dark mode */
+    --background: 210 7% 12%;
+    --foreground: 0 0% 100%;
+
+    --card: 210 7% 12%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 210 7% 12%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 158 64% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 7% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 7% 20%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 158 64% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 7% 25%;
+    --input: 210 7% 15%;
+    --ring: 158 64% 52%;
+
+    --calendar-selected: 158 64% 52%;
+    --calendar-available: 210 7% 20%;
+    --calendar-booked: 210 7% 15%;
+    --calendar-hover: 210 7% 25%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
